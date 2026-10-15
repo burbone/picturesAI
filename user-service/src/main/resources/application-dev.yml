@@ -1,0 +1,11 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8090/realms/ai-gallery
+
+management:
+  otlp:
+    tracing:
+      endpoint: http://localhost:4318/v1/traces

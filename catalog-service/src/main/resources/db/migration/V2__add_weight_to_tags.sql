@@ -1,0 +1,1 @@
+ALTER TABLE catalog_image_tags ADD COLUMN weight NUMERIC(3,2) NOT NULL DEFAULT 0.5;

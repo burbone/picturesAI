@@ -1,0 +1,25 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8090/realms/ai-gallery
+          jwk-set-uri: http://keycloak:8080/realms/ai-gallery/protocol/openid-connect/certs
+  data:
+    redis:
+      host: redis
+      port: 6379
+      password: picturesAI
+
+app:
+  downstream:
+    user-service: http://picturesAI-user-service:8081
+    generation-service: http://picturesAI-generation-service:8082
+    notification-service: http://picturesAI-notification-service:8083
+    catalog-service: http://picturesAI-catalog-service:8085
+    billing-service: http://picturesAI-billing-service:8086
+
+management:
+  otlp:
+    tracing:
+      endpoint: http://tempo:4318/v1/traces

@@ -1,0 +1,37 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  kafka:
+    consumer:
+      group-id: tagging-service
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    listener:
+      ack-mode: manual
+      missing-topics-fatal: false
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+tagging:
+  mode: keywords
+  llm:
+    endpoint: http://localhost:0
+    model: qwen2.5:1.5b
+    timeout-ms: 10000
+    max-tags: 10
+  keyword:
+    max-tags: 10
+    min-weight: 0.1
+  outbox:
+    fixed-delay-ms: 200
+    batch-size: 100
+    send-timeout-ms: 5000
+
+management:
+  tracing:
+    enabled: false

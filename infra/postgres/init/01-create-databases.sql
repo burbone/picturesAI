@@ -1,0 +1,6 @@
+CREATE DATABASE users_db;
+CREATE DATABASE generations_db;
+CREATE DATABASE tags_db;
+CREATE DATABASE catalog_db;
+CREATE DATABASE billing_db;
+CREATE DATABASE keycloak;

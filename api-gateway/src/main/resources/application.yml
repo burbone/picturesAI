@@ -1,0 +1,167 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8090/realms/ai-gallery
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: picturesAI
+  cloud:
+    gateway:
+      routes:
+        - id: catalog-service-recommendations
+          uri: ${app.downstream.catalog-service}
+          predicates:
+            - Path=/api/v1/recommendations
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: catalog-service
+        - id: catalog-service-user-generations
+          uri: ${app.downstream.catalog-service}
+          predicates:
+            - Path=/api/v1/users/*/generations
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: catalog-service
+        - id: user-service
+          uri: ${app.downstream.user-service}
+          predicates:
+            - Path=/api/v1/users/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                key-resolver: "#{@tierKeyResolver}"
+            - name: CircuitBreaker
+              args:
+                name: user-service
+        - id: generation-service
+          uri: ${app.downstream.generation-service}
+          predicates:
+            - Path=/api/v1/generations/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                key-resolver: "#{@tierKeyResolver}"
+            - name: CircuitBreaker
+              args:
+                name: generation-service
+        - id: catalog-service-feed
+          uri: ${app.downstream.catalog-service}
+          predicates:
+            - Path=/api/v1/feed/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: catalog-service
+        - id: catalog-service-images
+          uri: ${app.downstream.catalog-service}
+          predicates:
+            - Path=/api/v1/images/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: catalog-service
+        - id: catalog-service-tags
+          uri: ${app.downstream.catalog-service}
+          predicates:
+            - Path=/api/v1/tags/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: catalog-service
+        - id: catalog-service-search
+          uri: ${app.downstream.catalog-service}
+          predicates:
+            - Path=/api/v1/search
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: catalog-service
+        - id: billing-internal
+          uri: ${app.downstream.billing-service}
+          predicates:
+            - Path=/api/v1/internal/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: billing-service
+        - id: billing-service
+          uri: ${app.downstream.billing-service}
+          predicates:
+            - Path=/api/v1/billing/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                key-resolver: "#{@tierKeyResolver}"
+            - name: CircuitBreaker
+              args:
+                name: billing-service
+        - id: notification-service
+          uri: ${app.downstream.notification-service}
+          predicates:
+            - Path=/ws/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: notification-service
+        - id: billing-webhooks
+          uri: ${app.downstream.billing-service}
+          predicates:
+            - Path=/api/v1/webhooks/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: billing-service
+
+app:
+  downstream:
+    user-service: http://localhost:8081
+    generation-service: http://localhost:8082
+    notification-service: http://localhost:8083
+    catalog-service: http://localhost:8085
+    billing-service: http://localhost:8086
+  rate-limit:
+    free: 10
+    pro: 100
+    billing: 30
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 5
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 30s
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+  tracing:
+    sampling:
+      probability: 1.0
+  otlp:
+    tracing:
+      endpoint: http://localhost:4318/v1/traces
+
+logging:
+  level:
+    org.springframework.security: INFO

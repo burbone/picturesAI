@@ -1,0 +1,1 @@
+ALTER TABLE generations ADD COLUMN last_error_message TEXT;

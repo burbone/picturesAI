@@ -1,0 +1,61 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: notification-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8090/realms/ai-gallery
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP:127.0.0.1:29092}
+    consumer:
+      group-id: notification-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    listener:
+      observation-enabled: true
+
+nats:
+  url: ${NATS_URL:nats://127.0.0.1:4222}
+  username: ${NATS_USERNAME:picturesAI}
+  password: ${NATS_PASSWORD:picturesAI}
+  subject: notification.push
+
+generation-service:
+  base-url: ${GENERATION_SERVICE_URL:http://127.0.0.1:8082}
+  timeout-ms: 2000
+
+notification:
+  ws:
+    heartbeat-interval-seconds: ${WS_HEARTBEAT_INTERVAL:20}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  metrics:
+    tags:
+      application: notification-service
+  tracing:
+    sampling:
+      probability: 1.0
+  otlp:
+    tracing:
+      endpoint: ${OTLP_ENDPOINT:http://127.0.0.1:4318/v1/traces}
+
+logging:
+  level:
+    root: INFO
+    com.picturesAI.notification_service: DEBUG

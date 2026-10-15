@@ -1,0 +1,11 @@
+logging:
+  level:
+    root: INFO
+    com.picturesai.generation: DEBUG
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8090/realms/ai-gallery

@@ -1,0 +1,129 @@
+spring:
+  application:
+    name: generation-service
+  config:
+    import:
+      - optional:file:.env[.properties]
+      - optional:file:generation-service/.env[.properties]
+  datasource:
+    url: jdbc:postgresql://127.0.0.1:5433/generations_db
+    username: picturesai
+    password: picturesAI
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      password: picturesAI
+  kafka:
+    bootstrap-servers: 127.0.0.1:29092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+      properties:
+        delivery.timeout.ms: 15000
+        request.timeout.ms: 10000
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+  threads:
+    virtual:
+      enabled: true
+
+server:
+  port: 8082
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics,env
+  tracing:
+    sampling:
+      probability: 1.0
+  otlp:
+    tracing:
+      endpoint: http://127.0.0.1:4318/v1/traces
+
+minio:
+  endpoint: http://127.0.0.1:9000
+  access-key: picturesAI
+  secret-key: picturesAI
+  originals-bucket: ai-gallery-originals
+  thumbnails-bucket: ai-gallery-thumbnails
+  presigned-ttl-seconds: 604800
+
+nats:
+  url: nats://127.0.0.1:4222
+  username: picturesAI
+  password: picturesAI
+
+mock:
+  latency-ms: 200
+  latency-jitter-ms: 100
+  error-rate-429: 0.0
+  error-rate-5xx: 0.0
+
+cloudflare:
+  account-id: ${CLOUDFLARE_ACCOUNT_ID:}
+  api-token: ${CLOUDFLARE_API_TOKEN:}
+  model: "@cf/black-forest-labs/flux-1-schnell"
+  default-width: 1024
+  default-height: 1024
+
+huggingface:
+  rate-limit:
+    min-interval-ms: 15000
+
+generation:
+  dispatcher:
+    total-slots: 30
+    slots-pro-reserved: 20
+    slots-free-reserved: 10
+    premium-queue-capacity: 10
+    free-queue-capacity: 50
+    idle-poll-ms: 50
+  consumer:
+    pro-topic: generation.requested.pro
+    free-topic: generation.requested.free
+    pro-group-id: generation-service-workers-pro
+    free-group-id: generation-service-workers-free
+    poll-timeout-ms: 500
+    idle-park-ms: 50
+  retry:
+    max-attempts: 3
+    delay-seconds: 30
+    dlq-topic: generation.requested.dlq
+    scheduler-batch-size: 100
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      cloudflare:
+        account-id: ${CLOUDFLARE_ACCOUNT_ID:}
+        api-token: ${CLOUDFLARE_API_TOKEN:}
+        model: "@cf/black-forest-labs/flux-1-schnell"
+        steps: 4
+  bulkhead:
+    instances:
+      cloudflare:
+        maxConcurrentCalls: 5
+        maxWaitDuration: 500ms
+  retry:
+    instances:
+      cloudflare:
+        maxAttempts: 2
+        waitDuration: 1s

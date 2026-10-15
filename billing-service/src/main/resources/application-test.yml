@@ -1,0 +1,15 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+
+billing:
+  plans:
+    FREE:
+      daily-limit: 10
+    PRO:
+      daily-limit: 100
+  reservation-ttl-minutes: 15
+  cleanup-interval-ms: 600000

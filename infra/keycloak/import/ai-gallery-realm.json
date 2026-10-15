@@ -1,0 +1,57 @@
+{
+  "realm": "ai-gallery",
+  "enabled": true,
+  "registrationAllowed": false,
+  "roles": {
+    "realm": [
+      { "name": "user" },
+      { "name": "admin" }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "frontend",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": ["http://localhost:*"],
+      "webOrigins": ["http://localhost:*"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      }
+    },
+    {
+      "clientId": "api-gateway",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "picturesAI",
+      "standardFlowEnabled": true,
+      "serviceAccountsEnabled": true,
+      "redirectUris": ["http://localhost:*"],
+      "webOrigins": ["http://localhost:*"]
+    }
+  ],
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "email": "admin@ai-gallery.local",
+      "emailVerified": true,
+      "credentials": [
+        { "type": "password", "value": "picturesAI", "temporary": false }
+      ],
+      "realmRoles": ["admin", "user"]
+    },
+    {
+      "username": "user",
+      "enabled": true,
+      "email": "user@ai-gallery.local",
+      "emailVerified": true,
+      "credentials": [
+        { "type": "password", "value": "picturesAI", "temporary": false }
+      ],
+      "realmRoles": ["user"]
+    }
+  ]
+}ыы

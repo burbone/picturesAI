@@ -1,0 +1,17 @@
+server:
+  port: 8082
+
+spring:
+  config:
+    activate:
+      on-profile: mock
+
+mock:
+  latency-ms: 10
+  latency-jitter-ms: 0
+  error-rate-429: 0.0
+  error-rate-5xx: 0.0
+
+logging:
+  level:
+    com.picturesAI.generation_service: INFO
